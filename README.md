@@ -4,7 +4,7 @@ A proof-of-concept project demonstrating end-to-end testing using Cypress with C
 
 ## Tech Stack
 
-- **Frontend Framework**: Next.js 15
+- **Frontend Framework**: Next.js 14.1
 - **UI Components**: Mantine UI 7.14
 - **Testing Framework**: Cypress 13.16
 - **BDD Framework**: Cucumber (via @badeball/cypress-cucumber-preprocessor 21.0)
@@ -13,8 +13,20 @@ A proof-of-concept project demonstrating end-to-end testing using Cypress with C
 
 ## Prerequisites
 
-- Node.js (Latest LTS version recommended)
-- npm or yarn
+- Node.js 22.11.0 (managed by Volta)
+- npm 10.9.1 (managed by Volta)
+
+### Volta Setup
+
+This project uses [Volta](https://volta.sh/) to ensure consistent Node.js and npm versions. If you have Volta installed, it will automatically use the correct versions specified in `package.json`.
+
+```bash
+# Install Volta (if not already installed)
+curl https://get.volta.sh | bash
+
+# Volta will automatically use the correct versions when you cd into the project directory
+cd poc-cucumber-cypress
+```
 
 ## Installation
 
@@ -83,7 +95,7 @@ This project uses Cucumber with Cypress for end-to-end testing. The tests are wr
 
 ### Main Dependencies
 
-- `next`: ^15.0.3
+- `next`: ^14.2.0
 - `react`: ^18.3.1
 - `react-dom`: ^18.3.1
 - `@mantine/core`: ^7.14.1
@@ -91,6 +103,10 @@ This project uses Cucumber with Cypress for end-to-end testing. The tests are wr
 - `@mantine/form`: ^7.14.1
 - `@mantine/hooks`: ^7.14.1
 - `@tabler/icons-react`: ^3.22.0
+- `@types/node`: ^22.9.1
+- `@types/react`: ^18.3.12
+- `@types/react-dom`: ^18.3.1
+- `@types/uuid`: ^10.0.0
 - `typescript`: ^5.7.2
 - `uuid`: ^11.0.3
 
