@@ -1,0 +1,45 @@
+{
+  "name": "poc-cucumber-cypress",
+  "version": "1.0.0",
+  "description": "Demo Next.js app with Cypress and Cucumber",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "start-server-and-test dev http://localhost:3000 cypress:run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@mantine/core": "^7.14.1",
+    "@mantine/dates": "^7.14.1",
+    "@mantine/form": "^7.14.1",
+    "@mantine/hooks": "^7.14.1",
+    "@tabler/icons-react": "^3.22.0",
+    "@types/node": "^22.9.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/uuid": "^10.0.0",
+    "next": "^15.0.3",
+    "postcss": "^8.4.49",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.7.2",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^21.0.3",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.3",
+    "cypress": "^13.16.0",
+    "cypress-file-upload": "^5.0.8",
+    "esbuild": "^0.24.0",
+    "start-server-and-test": "^2.0.8"
+  }
+}
