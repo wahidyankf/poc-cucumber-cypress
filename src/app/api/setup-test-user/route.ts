@@ -1,75 +1,59 @@
+import { createUser } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { createUser, type UserInput } from "@/lib/db";
-import { writeFile } from "fs/promises";
-import path from "path";
-import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: Request) {
-  // Only allow in test environment
-  if (process.env.NODE_ENV === "production") {
-    return new NextResponse(
-      JSON.stringify({ error: "Not allowed in production" }),
-      {
-        status: 403,
-      }
-    );
-  }
-
   try {
-    let userData: UserInput;
-    let profilePicture: File | null = null;
-
-    const contentType = request.headers.get("content-type") || "";
-    if (contentType.includes("multipart/form-data")) {
-      const formData = await request.formData();
-      userData = {
-        email: formData.get("email") as string,
-        password: formData.get("password") as string,
-        firstName: formData.get("firstName") as string,
-        lastName: formData.get("lastName") as string,
-      };
-      profilePicture = formData.get("profilePicture") as File | null;
-    } else {
-      // Handle JSON request
-      const body = await request.json();
-      userData = {
-        email: body.email,
-        password: body.password,
-        firstName: body.firstName,
-        lastName: body.lastName,
-      };
-    }
-
-    if (profilePicture) {
-      // Generate a unique filename
-      const fileExtension = profilePicture.name.split(".").pop() || "jpg";
-      const fileName = `${uuidv4()}.${fileExtension}`;
-      const filePath = path.join(
-        process.cwd(),
-        "public/uploads/profile-pictures",
-        fileName
+    // Only allow in non-production environments
+    if (process.env.NODE_ENV === "production") {
+      console.log("Test user setup blocked in production");
+      return new NextResponse(
+        JSON.stringify({ error: "Not allowed in production" }),
+        { status: 403 }
       );
-
-      // Convert File to Buffer and save it
-      const arrayBuffer = await profilePicture.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      await writeFile(filePath, buffer);
-
-      // Store the relative path in the user data
-      userData.profilePicture = `/uploads/profile-pictures/${fileName}`;
     }
 
-    await createUser(userData);
+    const contentType = request.headers.get("content-type");
+    console.log("Setup test user request content-type:", contentType);
+
+    let userData;
+    if (contentType?.includes("application/json")) {
+      userData = await request.json();
+    } else if (contentType?.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      userData = Object.fromEntries(formData);
+    } else {
+      console.log("Unsupported content type:", contentType);
+      return new NextResponse(
+        JSON.stringify({ error: "Unsupported content type" }),
+        { status: 400 }
+      );
+    }
+
+    console.log("Setting up test user with data:", userData);
+
+    // Normalize field names
+    const normalizedUserData = {
+      email: userData.email || userData.Email,
+      password: userData.password || userData.Password,
+      firstName:
+        userData.firstName || userData["First Name"] || userData.firstname,
+      lastName: userData.lastName || userData["Last Name"] || userData.lastname,
+    };
+
+    console.log("Normalized user data:", normalizedUserData);
+
+    // Create the test user
+    await createUser(normalizedUserData);
+    console.log("Test user created successfully");
+
     return new NextResponse(JSON.stringify({ success: true }), {
-      status: 201, // Changed to match test expectation
+      status: 201,
     });
   } catch (error) {
-    console.error("Error creating user:", error);
+    console.error("Error setting up test user:", error);
     return new NextResponse(
-      JSON.stringify({ error: "Failed to create user" }),
-      {
-        status: 500,
-      }
+      JSON.stringify({ error: "Failed to set up test user", details: error }),
+      { status: 500 }
     );
   }
 }

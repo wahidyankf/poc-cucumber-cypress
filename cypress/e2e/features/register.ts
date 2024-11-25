@@ -22,13 +22,13 @@ When("I visit the registration page", () => {
 
 // Profile Picture Upload
 When("I upload a profile picture", () => {
-  cy.fixture("profile-picture.jpg").then((fileContent) => {
-    cy.get('[data-test="profile-picture"] input').attachFile({
-      fileContent,
-      fileName: "profile-picture.jpg",
-      mimeType: "image/jpeg",
+  // For Mantine's FileInput, we need to trigger the hidden file input
+  cy.get('[data-test="profile-picture"]')
+    .click()
+    .then(() => {
+      // After clicking, find the actual file input that Mantine creates
+      cy.get('input[type="file"]').selectFile('cypress/fixtures/profile-picture.jpg', { force: true });
     });
-  });
 });
 
 // Form filling
@@ -103,6 +103,10 @@ When("I select {string} as gender", (gender: string) => {
 
 When("I accept the terms and conditions", () => {
   cy.get('[data-test="terms-and-conditions"]').check();
+});
+
+When("I do not accept the terms and conditions", () => {
+  cy.get('[data-test="terms-and-conditions"]').uncheck();
 });
 
 When("I subscribe to the newsletter", () => {

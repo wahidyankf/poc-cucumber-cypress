@@ -30,41 +30,95 @@ async function ensureDbExists() {
   }
 }
 
-export async function getUsers(): Promise<User[]> {
-  await ensureDbExists();
-  const data = await fs.readFile(USERS_FILE, "utf-8");
-  return JSON.parse(data);
+export async function readUsers(): Promise<User[]> {
+  try {
+    await ensureDbExists();
+    
+    const data = await fs.readFile(USERS_FILE, "utf-8");
+    const users = JSON.parse(data);
+    console.log("Read users from file:", users);
+    return users;
+  } catch (error) {
+    console.error("Error reading users:", error);
+    return [];
+  }
 }
 
-export async function saveUsers(users: User[]): Promise<void> {
-  await ensureDbExists();
-  await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+export async function writeUsers(users: User[]): Promise<void> {
+  try {
+    await ensureDbExists();
+    console.log("Writing users to file:", users);
+    await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+    console.log("Users written successfully");
+  } catch (error) {
+    console.error("Error writing users:", error);
+    throw error;
+  }
 }
 
-export async function findUser(
-  email: string,
-  password: string
-): Promise<User | undefined> {
-  const users = await getUsers();
-  return users.find((u) => u.email === email && u.password === password);
+export async function clearUsers(): Promise<void> {
+  try {
+    console.log("Clearing all users");
+    await writeUsers([]);
+    console.log("Users cleared successfully");
+  } catch (error) {
+    console.error("Error clearing users:", error);
+    throw error;
+  }
+}
+
+export async function findUser(email: string | undefined, password: string | undefined): Promise<User | null> {
+  try {
+    if (!email || !password) return null;
+    
+    const users = await readUsers();
+    const user = users.find(
+      (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+    );
+
+    if (user) {
+      return {
+        email: user.email,
+        password: user.password,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.profilePicture
+      };
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function createUser(user: UserInput): Promise<void> {
-  const users = await getUsers();
-  const existingUserIndex = users.findIndex((u) => u.email === user.email);
+  try {
+    console.log("Creating new user:", user);
+    const users = await readUsers();
+    console.log("Existing users:", users);
 
-  // Convert UserInput to User (ensuring profilePicture is a string or undefined)
-  const userToSave: User = {
-    ...user,
-    profilePicture:
-      typeof user.profilePicture === "string" ? user.profilePicture : undefined,
-  };
+    // Normalize the user data
+    const normalizedUser: User = {
+      email: user.email || user.Email,
+      password: user.password || user.Password,
+      firstName: user.firstName || user['First Name'] || user.firstname,
+      lastName: user.lastName || user['Last Name'] || user.lastname,
+      profilePicture:
+        typeof user.profilePicture === "string" ? user.profilePicture : undefined,
+    };
 
-  if (existingUserIndex !== -1) {
-    users[existingUserIndex] = userToSave;
-  } else {
-    users.push(userToSave);
+    // Check if user already exists
+    const existingUser = users.find((u) => (u.email || u.Email) === normalizedUser.email);
+    if (existingUser) {
+      console.log("User already exists:", existingUser);
+      throw new Error("User already exists");
+    }
+
+    users.push(normalizedUser);
+    await writeUsers(users);
+    console.log("User created successfully:", normalizedUser);
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
   }
-
-  await saveUsers(users);
 }

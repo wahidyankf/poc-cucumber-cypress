@@ -60,7 +60,7 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit}>
         <Stack>
           {error && (
-            <Text c="red" ta="center">
+            <Text c="red" ta="center" data-test="validation-error">
               {error}
             </Text>
           )}

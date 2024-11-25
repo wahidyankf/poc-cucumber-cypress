@@ -16,11 +16,17 @@ Given(
       lastName: "Doe",
     };
 
-    // Create user in backend
+    // Clear any existing users first
     cy.request({
       method: "POST",
-      url: "/api/setup-test-user",
-      body: userInfo,
+      url: "/api/test/clear-data",
+    }).then(() => {
+      // Create user in backend
+      cy.request({
+        method: "POST",
+        url: "/api/setup-test-user",
+        body: userInfo,
+      });
     });
   }
 );
@@ -36,40 +42,47 @@ Given(
       {} as Record<string, string>
     );
 
-    // Create user in backend
+    // Clear any existing users first
     cy.request({
       method: "POST",
-      url: "/api/setup-test-user",
-      body: {
-        ...userInfo,
-        password: userInfo.password,
-      },
+      url: "/api/test/clear-data",
     }).then(() => {
-      // Login to get auth token
+      // Create user in backend
       cy.request({
         method: "POST",
-        url: "/api/login",
-        body: {
-          email: userInfo.email,
-          password: userInfo.password,
-        },
+        url: "/api/setup-test-user",
+        body: userInfo,
+      }).then(() => {
+        // Login to get auth token
+        cy.request({
+          method: "POST",
+          url: "/api/login",
+          body: {
+            email: userInfo.email,
+            password: userInfo.password,
+          },
+        }).then((response) => {
+          expect(response.status).to.equal(200);
+          
+          // Set auth cookie
+          cy.setCookie("auth-token", "dummy-token");
+
+          // Set localStorage
+          cy.window().then((win) => {
+            win.localStorage.setItem(
+              "userInfo",
+              JSON.stringify({
+                firstName: userInfo.firstName,
+                lastName: userInfo.lastName,
+                email: userInfo.email,
+                phoneNumber: userInfo.phoneNumber,
+                bio: userInfo.bio,
+                gender: userInfo.gender,
+              })
+            );
+          });
+        });
       });
-
-      // Set auth cookie
-      cy.setCookie("auth-token", "dummy-token");
-
-      // Set localStorage
-      localStorage.setItem(
-        "userInfo",
-        JSON.stringify({
-          firstName: userInfo.firstName,
-          lastName: userInfo.lastName,
-          email: userInfo.email,
-          phoneNumber: userInfo.phoneNumber,
-          bio: userInfo.bio,
-          gender: userInfo.gender,
-        })
-      );
     });
   }
 );
