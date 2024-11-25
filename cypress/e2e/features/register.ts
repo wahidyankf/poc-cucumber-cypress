@@ -26,19 +26,23 @@ When("I upload a profile picture", () => {
   cy.fixture("profile-picture.jpg", "base64").then((fileContent) => {
     // Convert base64 to blob
     const blob = Cypress.Blob.base64StringToBlob(fileContent, "image/jpeg");
-    const testFile = new File([blob], "profile-picture.jpg", { type: "image/jpeg" });
-    
+    const testFile = new File([blob], "profile-picture.jpg", {
+      type: "image/jpeg",
+    });
+
     // Use Mantine's FileInput component directly
     cy.get('[data-test="profile-picture"]').then(($input) => {
       // Trigger the file selection programmatically
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(testFile);
-      
+
       // Find the hidden input within Mantine's FileInput
-      const fileInput = $input.find('input[type="file"]')[0];
+      const fileInput = $input.find(
+        'input[type="file"]'
+      )[0] as HTMLInputElement;
       if (fileInput) {
         fileInput.files = dataTransfer.files;
-        cy.wrap(fileInput).trigger('change', { force: true });
+        cy.wrap(fileInput).trigger("change", { force: true });
       }
     });
   });
@@ -64,10 +68,7 @@ When(
     // Fill in each field
     Object.entries(formData).forEach(([field, value]) => {
       const selector = `[data-test="${field}"]`;
-      cy.get(selector)
-        .clear()
-        .type(value)
-        .should("have.value", value);
+      cy.get(selector).clear().type(value).should("have.value", value);
     });
   }
 );
@@ -99,12 +100,16 @@ When("I fill in all required registration fields correctly", () => {
   });
 
   // Select gender
-  cy.get('[data-test="gender-group"] input[value="male"]').check({ force: true });
+  cy.get('[data-test="gender-group"] input[value="male"]').check({
+    force: true,
+  });
 });
 
 // Selections and checkboxes
 When("I select {string} as gender", (gender: string) => {
-  cy.get(`[data-test="gender-group"] input[value="${gender}"]`).check({ force: true });
+  cy.get(`[data-test="gender-group"] input[value="${gender}"]`).check({
+    force: true,
+  });
 });
 
 When("I accept the terms and conditions", () => {
@@ -127,7 +132,9 @@ When("I click the register button", () => {
 // Assertions
 Then("I should see all registration fields are filled correctly", () => {
   // Wait for form submission and success message
-  cy.get('[data-test="registration-success"]', { timeout: 10000 }).should("be.visible");
+  cy.get('[data-test="registration-success"]', { timeout: 10000 }).should(
+    "be.visible"
+  );
   cy.get('[data-test="validation-error"]').should("not.exist");
 });
 

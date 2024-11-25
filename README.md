@@ -2,6 +2,19 @@
 
 A proof-of-concept project demonstrating end-to-end testing using Cypress with Cucumber integration in a Next.js application. This project uses Mantine UI components for the frontend and implements BDD (Behavior Driven Development) testing practices.
 
+## Features
+
+- **User Authentication**: Complete user registration and login functionality
+- **User Profile Management**: Profile creation and updates with support for:
+  - Basic information (name, email, phone)
+  - Profile picture upload
+  - Address information
+  - Bio and gender
+- **Dashboard**: Personalized user dashboard after authentication
+- **Data Persistence**: File-based JSON storage for demonstration purposes
+- **Form Validation**: Comprehensive client and server-side validation
+- **Responsive Design**: Mobile-friendly UI using Mantine components
+
 ## Tech Stack
 
 - **Frontend Framework**: Next.js 14.1
@@ -10,6 +23,7 @@ A proof-of-concept project demonstrating end-to-end testing using Cypress with C
 - **BDD Framework**: Cucumber (via @badeball/cypress-cucumber-preprocessor 21.0)
 - **Language**: TypeScript 5.7
 - **Styling**: PostCSS with Mantine preset
+- **Data Storage**: File-based JSON (for demonstration purposes)
 
 ## Prerequisites
 
@@ -59,8 +73,14 @@ poc-cucumber-cypress/
 │   └── support/               # Support files and commands
 ├── src/                       # Source code
 │   ├── app/                   # Next.js app directory
+│   │   ├── api/              # API routes for authentication and user management
+│   │   ├── dashboard/        # Dashboard page
+│   │   ├── login/           # Login page
+│   │   └── register/        # Registration page
 │   ├── components/            # React components
-│   └── styles/                # CSS and style files
+│   ├── lib/                  # Utilities and database operations
+│   └── styles/               # CSS and style files
+├── data/                     # JSON file storage directory
 ├── public/                    # Static files
 ├── cypress.config.ts          # Cypress configuration
 ├── next-env.d.ts             # Next.js TypeScript declarations
@@ -71,6 +91,14 @@ poc-cucumber-cypress/
 ## Testing
 
 This project uses Cucumber with Cypress for end-to-end testing. The tests are written in Gherkin syntax (`.feature` files) with corresponding step definitions in TypeScript.
+
+### Feature Files
+
+The project includes several feature files that test different aspects of the application:
+
+- `login.feature`: Tests user authentication scenarios
+- `register.feature`: Tests user registration process
+- `dashboard.feature`: Tests dashboard functionality and profile management
 
 ### Running Tests
 
@@ -125,6 +153,16 @@ The project uses PostCSS with the following plugins:
 
 - `postcss-preset-mantine`
 - `postcss-simple-vars`
+
+## Data Storage
+
+For demonstration purposes, this project uses a simple file-based JSON storage system located in the `data` directory. In a production environment, this should be replaced with a proper database system.
+
+### Storage Structure
+
+- User data is stored in `data/users.json`
+- Profile pictures are stored in the public directory
+- All data is persisted between server restarts
 
 ## License
 

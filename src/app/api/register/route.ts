@@ -13,11 +13,19 @@ export async function POST(request: Request) {
     const gender = formData.get("gender") as string;
     const bio = formData.get("bio") as string;
     const terms = formData.get("terms") === "true";
-    const newsletter = formData.get("newsletter") === "true";
     const profilePicture = formData.get("profilePicture") as File;
 
     // Validate required fields
-    if (!firstName || !lastName || !email || !password || !phoneNumber || !address || !gender || !terms) {
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password ||
+      !phoneNumber ||
+      !address ||
+      !gender ||
+      !terms
+    ) {
       return new NextResponse(
         JSON.stringify({ error: "All required fields must be filled" }),
         { status: 400 }
@@ -69,7 +77,7 @@ export async function POST(request: Request) {
       address,
       gender,
       bio,
-      profilePictureUrl,
+      profilePicture,
     });
 
     return new NextResponse(JSON.stringify({ success: true }), {
