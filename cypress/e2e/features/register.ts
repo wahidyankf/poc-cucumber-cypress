@@ -52,23 +52,32 @@ When("I upload a profile picture", () => {
 When(
   "I fill in the following registration fields:",
   (dataTable: { hashes: () => Array<{ Field: string; Value: string }> }) => {
+    const fieldMappings: Record<string, string> = {
+      "First Name": "first-name",
+      "Last Name": "last-name",
+      "Phone Number": "phone-number",
+      Email: "email",
+      Password: "password",
+      "Password Confirmation": "password-confirmation",
+      Address: "address",
+    };
+
     const formData = dataTable
       .hashes()
-      .reduce(
-        (
-          acc: Record<string, string>,
-          row: { Field: string; Value: string }
-        ) => {
-          acc[row.Field.toLowerCase().replace(/\s+/g, "-")] = row.Value;
-          return acc;
-        },
-        {} as Record<string, string>
-      );
+      .reduce((acc: Record<string, string>, row) => {
+        const fieldId = fieldMappings[row.Field];
+        if (fieldId) {
+          acc[fieldId] = row.Value;
+        }
+        return acc;
+      }, {});
 
     // Fill in each field
     Object.entries(formData).forEach(([field, value]) => {
-      const selector = `[data-test="${field}"]`;
-      cy.get(selector).clear().type(value).should("have.value", value);
+      cy.get(`[data-test="${field}"]`)
+        .clear()
+        .type(value)
+        .should("have.value", value);
     });
   }
 );
@@ -84,26 +93,38 @@ When(
   }
 );
 
-When("I fill in all required registration fields correctly", () => {
-  const defaultData = {
-    "first-name": "John",
-    "last-name": "Doe",
-    "phone-number": "1234567890",
-    email: "john.doe@example.com",
-    password: "SecurePass123!",
-    "password-confirmation": "SecurePass123!",
-    address: "123 Main St, City",
-  };
+When(
+  "I fill in all required registration fields correctly:",
+  (dataTable: { hashes: () => Array<{ Field: string; Value: string }> }) => {
+    const fieldMappings: Record<string, string> = {
+      "First Name": "first-name",
+      "Last Name": "last-name",
+      "Phone Number": "phone-number",
+      Email: "email",
+      Password: "password",
+      "Password Confirmation": "password-confirmation",
+      Address: "address",
+    };
 
-  Object.entries(defaultData).forEach(([field, value]) => {
-    cy.get(`[data-test="${field}"]`).clear().type(value);
-  });
+    const formData = dataTable
+      .hashes()
+      .reduce((acc: Record<string, string>, row) => {
+        const fieldId = fieldMappings[row.Field];
+        if (fieldId) {
+          acc[fieldId] = row.Value;
+        }
+        return acc;
+      }, {});
 
-  // Select gender
-  cy.get('[data-test="gender-group"] input[value="male"]').check({
-    force: true,
-  });
-});
+    // Fill in each field
+    Object.entries(formData).forEach(([field, value]) => {
+      cy.get(`[data-test="${field}"]`)
+        .clear()
+        .type(value)
+        .should("have.value", value);
+    });
+  }
+);
 
 // Selections and checkboxes
 When("I select {string} as gender", (gender: string) => {

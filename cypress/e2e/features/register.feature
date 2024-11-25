@@ -44,7 +44,15 @@ Feature: Registration
 
   Scenario: Registration terms and conditions validation
     When I visit the registration page
-    And I fill in all required registration fields correctly
+    And I fill in all required registration fields correctly:
+      | Field                 | Value                |
+      | First Name            | John                 |
+      | Last Name             | Doe                  |
+      | Phone Number          | 1234567890           |
+      | Email                 | john.doe@example.com |
+      | Password              | SecurePass123!       |
+      | Password Confirmation | SecurePass123!       |
+      | Address               | 123 Main St, City    |
     But I do not accept the terms and conditions
     And I click the register button
     Then I should see terms and conditions validation error
