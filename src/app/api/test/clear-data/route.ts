@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 
-const USERS_FILE = path.join(process.cwd(), "data", "users.json");
+const DATA_DIR = path.join(process.cwd(), "data");
+const USERS_FILE = path.join(DATA_DIR, "users.json");
 const UPLOADS_DIR = path.join(process.cwd(), "public/uploads/profile-pictures");
 
 export async function POST(request: globalThis.Request) {
@@ -19,14 +20,17 @@ export async function POST(request: globalThis.Request) {
   try {
     console.log("Starting to clear test data...");
 
-    // Ensure directories exist
-    await fs.mkdir(path.dirname(USERS_FILE), { recursive: true });
-    await fs.mkdir(UPLOADS_DIR, { recursive: true });
-    console.log("Directories ensured");
+    // First ensure the data directory exists
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    console.log("Data directory ensured at:", DATA_DIR);
 
-    // Clear users.json
+    // Ensure uploads directory exists
+    await fs.mkdir(UPLOADS_DIR, { recursive: true });
+    console.log("Uploads directory ensured at:", UPLOADS_DIR);
+
+    // Initialize users.json with empty array if it doesn't exist
     await fs.writeFile(USERS_FILE, JSON.stringify([]));
-    console.log("Users file cleared");
+    console.log("Users file initialized at:", USERS_FILE);
 
     // Clear uploaded files
     try {

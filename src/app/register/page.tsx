@@ -66,6 +66,23 @@ export default function Register() {
     const form = e.currentTarget;
     const newValidationErrors: { [key: string]: boolean } = {};
 
+    // Check required fields
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "phoneNumber",
+      "email",
+      "password",
+      "passwordConfirmation",
+      "address",
+    ];
+    requiredFields.forEach((field) => {
+      const input = form.querySelector<HTMLInputElement>(`[name="${field}"]`);
+      if (!input?.value) {
+        newValidationErrors[field] = true;
+      }
+    });
+
     // Check phone number
     const phoneInput = form.querySelector<HTMLInputElement>(
       '[name="phoneNumber"]'
@@ -81,8 +98,9 @@ export default function Register() {
     }
 
     // Check password match
-    const password =
-      form.querySelector<HTMLInputElement>('[name="password"]')?.value;
+    const password = form.querySelector<HTMLInputElement>(
+      '[name="password"]'
+    )?.value;
     const confirmation = form.querySelector<HTMLInputElement>(
       '[name="passwordConfirmation"]'
     )?.value;
@@ -91,10 +109,19 @@ export default function Register() {
     }
 
     // Check terms
-    const terms =
-      form.querySelector<HTMLInputElement>('[name="terms"]')?.checked;
+    const terms = form.querySelector<HTMLInputElement>(
+      '[name="terms"]'
+    )?.checked;
     if (!terms) {
       newValidationErrors.terms = true;
+    }
+
+    // Check gender selection
+    const gender = form.querySelector<HTMLInputElement>(
+      'input[name="gender"]:checked'
+    )?.value;
+    if (!gender) {
+      newValidationErrors.gender = true;
     }
 
     setValidationErrors(newValidationErrors);
@@ -103,45 +130,104 @@ export default function Register() {
       try {
         setSubmitting(true);
 
-        const formData = new FormData(form);
-        const userInfo = {
-          firstName: formData.get("firstName"),
-          lastName: formData.get("lastName"),
-          email: formData.get("email"),
-          phoneNumber: formData.get("phoneNumber"),
-          bio: formData.get("bio"),
-          gender: formData.get("gender"),
-        };
+        const formData = new FormData();
 
-        // Save user info to localStorage
-        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        // Add all form fields to FormData
+        formData.append(
+          "firstName",
+          form.querySelector<HTMLInputElement>('[name="firstName"]')?.value ||
+            ""
+        );
+        formData.append(
+          "lastName",
+          form.querySelector<HTMLInputElement>('[name="lastName"]')?.value ||
+            ""
+        );
+        formData.append(
+          "email",
+          form.querySelector<HTMLInputElement>('[name="email"]')?.value || ""
+        );
+        formData.append(
+          "password",
+          form.querySelector<HTMLInputElement>('[name="password"]')?.value ||
+            ""
+        );
+        formData.append(
+          "passwordConfirmation",
+          form.querySelector<HTMLInputElement>(
+            '[name="passwordConfirmation"]'
+          )?.value || ""
+        );
+        formData.append(
+          "phoneNumber",
+          form.querySelector<HTMLInputElement>('[name="phoneNumber"]')?.value ||
+            ""
+        );
+        formData.append(
+          "address",
+          form.querySelector<HTMLInputElement>('[name="address"]')?.value ||
+            ""
+        );
+        formData.append(
+          "gender",
+          form.querySelector<HTMLInputElement>('input[name="gender"]:checked')
+            ?.value || ""
+        );
+        formData.append(
+          "terms",
+          form.querySelector<HTMLInputElement>('[name="terms"]')?.checked
+            ? "true"
+            : "false"
+        );
+        formData.append(
+          "newsletter",
+          form.querySelector<HTMLInputElement>('[name="newsletter"]')?.checked
+            ? "true"
+            : "false"
+        );
+        formData.append(
+          "bio",
+          form.querySelector<HTMLTextAreaElement>('[name="bio"]')?.value || ""
+        );
 
-        // Handle profile picture if needed
+        // Add profile picture if selected
         if (profilePicture) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const userInfoWithPicture = {
-              ...userInfo,
-              profilePicture: reader.result,
-            };
-            localStorage.setItem(
-              "userInfo",
-              JSON.stringify(userInfoWithPicture)
-            );
-          };
-          reader.readAsDataURL(profilePicture);
+          formData.append("profilePicture", profilePicture);
         }
 
-        const response = await fetch("/api/setup-test-user", {
+        const response = await fetch("/api/register", {
           method: "POST",
           body: formData,
         });
 
         if (!response.ok) {
-          throw new Error("Registration failed");
+          const error = await response.json();
+          throw new Error(error.error || "Registration failed");
         }
 
         setFormSubmitted(true);
+
+        // Store user info in localStorage
+        const userInfo = {
+          email: form.querySelector<HTMLInputElement>('[name="email"]')?.value,
+          firstName: form.querySelector<HTMLInputElement>('[name="firstName"]')
+            ?.value,
+          lastName: form.querySelector<HTMLInputElement>('[name="lastName"]')
+            ?.value,
+          phoneNumber: form.querySelector<HTMLInputElement>(
+            '[name="phoneNumber"]'
+          )?.value,
+          bio: form.querySelector<HTMLTextAreaElement>('[name="bio"]')?.value,
+          gender: form.querySelector<HTMLInputElement>(
+            'input[name="gender"]:checked'
+          )?.value,
+        };
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+        // Wait a bit for localStorage to be set
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Redirect to dashboard
         router.push("/dashboard");
       } catch (error) {
         console.error("Registration error:", error);
@@ -149,8 +235,6 @@ export default function Register() {
       } finally {
         setSubmitting(false);
       }
-    } else {
-      form.reportValidity();
     }
   };
 
@@ -180,8 +264,8 @@ export default function Register() {
             <FileInput
               label="Profile Picture"
               placeholder="Upload your profile picture"
-              accept="image/*"
-              leftSection={<IconUpload size={14} />}
+              accept="image/jpeg,image/png"
+              icon={<IconUpload size={14} />}
               value={profilePicture}
               onChange={setProfilePicture}
               data-test="profile-picture"
@@ -200,6 +284,7 @@ export default function Register() {
                 label="Last Name"
                 placeholder="Enter your last name"
                 name="lastName"
+                required
                 data-test="last-name"
               />
             </Group>
@@ -258,7 +343,7 @@ export default function Register() {
               required
               error={
                 validationErrors.passwordMismatch && (
-                  <span data-test="password-mismatch-error">
+                  <span data-test="password-validation-error">
                     Passwords do not match
                   </span>
                 )
@@ -272,41 +357,36 @@ export default function Register() {
               }
             />
 
-            <Textarea
+            <TextInput
               label="Address"
               placeholder="Enter your address"
               name="address"
               required
-              minRows={3}
               data-test="address"
             />
 
-            <Radio.Group label="Gender" name="gender" required>
+            <Radio.Group
+              name="gender"
+              label="Gender"
+              required
+              data-test="gender-group"
+            >
               <Group mt="xs">
-                <Radio value="male" label="Male" data-test="gender-male" />
-                <Radio
-                  value="female"
-                  label="Female"
-                  data-test="gender-female"
-                />
+                <Radio value="male" label="Male" />
+                <Radio value="female" label="Female" />
+                <Radio value="other" label="Other" />
               </Group>
             </Radio.Group>
 
-            <Checkbox
-              label={
-                <div>
-                  <Text fw={500}>Newsletter</Text>
-                  <Text size="sm" c="dimmed">
-                    Receive updates about our latest products and offers
-                  </Text>
-                </div>
-              }
-              name="newsletter"
-              data-test="newsletter"
+            <Textarea
+              label="Bio"
+              placeholder="Tell us about yourself"
+              name="bio"
+              data-test="bio"
             />
 
             <Checkbox
-              label="I accept the terms and conditions"
+              label={<Text size="sm">I agree to the terms and conditions</Text>}
               name="terms"
               required
               error={
@@ -316,13 +396,17 @@ export default function Register() {
                   </span>
                 )
               }
-              data-test="terms-and-conditions"
+              data-test="terms"
+            />
+
+            <Checkbox
+              label={<Text size="sm">Subscribe to newsletter</Text>}
+              name="newsletter"
+              data-test="newsletter"
             />
 
             <Button
               type="submit"
-              fullWidth
-              mt="xl"
               loading={submitting}
               data-test="register-button"
             >

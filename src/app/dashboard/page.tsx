@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
   return (
     <Container size="sm">
-      <Title order={1} ta="center" mt="xl" mb="xl">
+      <Title order={1} ta="center" mt="xl" mb="xl" data-test="dashboard-welcome">
         Welcome, {userInfo.firstName}!
       </Title>
 
@@ -50,42 +50,43 @@ export default function DashboardPage() {
         <Stack>
           <Group justify="center">
             <Avatar
-              src={userInfo.profilePicture}
               size="xl"
               radius="xl"
-              alt={`${userInfo.firstName}'s profile picture`}
+              src={userInfo.profilePicture}
+              alt={`${userInfo.firstName} ${userInfo.lastName}`}
             />
           </Group>
 
-          <Group justify="center">
-            <Badge size="lg" variant="light">
+          <div data-test="profile-info">
+            <Group mb="xs">
+              <Text fw={500}>Name:</Text>
+              <Text>{userInfo.firstName} {userInfo.lastName}</Text>
+            </Group>
+
+            <Group mb="xs">
+              <Text fw={500}>Email:</Text>
+              <Text>{userInfo.email}</Text>
+            </Group>
+
+            <Group mb="xs">
+              <Text fw={500}>Phone:</Text>
+              <Text>{userInfo.phoneNumber}</Text>
+            </Group>
+
+            {userInfo.bio && (
+              <Group mb="xs">
+                <Text fw={500}>Bio:</Text>
+                <Text>{userInfo.bio}</Text>
+              </Group>
+            )}
+          </div>
+
+          <Group>
+            <Text fw={500}>Gender:</Text>
+            <Badge color="blue" data-test="gender-badge">
               {userInfo.gender}
             </Badge>
           </Group>
-
-          <Group>
-            <Text fw={500}>Name:</Text>
-            <Text>
-              {userInfo.firstName} {userInfo.lastName}
-            </Text>
-          </Group>
-
-          <Group>
-            <Text fw={500}>Email:</Text>
-            <Text>{userInfo.email}</Text>
-          </Group>
-
-          <Group>
-            <Text fw={500}>Phone:</Text>
-            <Text>{userInfo.phoneNumber}</Text>
-          </Group>
-
-          {userInfo.bio && (
-            <>
-              <Text fw={500}>Bio:</Text>
-              <Text>{userInfo.bio}</Text>
-            </>
-          )}
         </Stack>
       </Paper>
     </Container>

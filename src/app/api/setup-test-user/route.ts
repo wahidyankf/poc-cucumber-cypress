@@ -31,13 +31,12 @@ export async function POST(request: Request) {
 
     console.log("Setting up test user with data:", userData);
 
-    // Normalize field names
+    // Normalize and trim field values
     const normalizedUserData = {
-      email: userData.email || userData.Email,
-      password: userData.password || userData.Password,
-      firstName:
-        userData.firstName || userData["First Name"] || userData.firstname,
-      lastName: userData.lastName || userData["Last Name"] || userData.lastname,
+      email: (userData.email || userData.Email || "").trim(),
+      password: (userData.password || userData.Password || "").trim(),
+      firstName: (userData.firstName || userData["First Name"] || userData.firstname || "").trim(),
+      lastName: (userData.lastName || userData["Last Name"] || userData.lastname || "").trim(),
     };
 
     console.log("Normalized user data:", normalizedUserData);
@@ -50,9 +49,9 @@ export async function POST(request: Request) {
       status: 201,
     });
   } catch (error) {
-    console.error("Error setting up test user:", error);
+    console.error("Error creating test user:", error);
     return new NextResponse(
-      JSON.stringify({ error: "Failed to set up test user", details: error }),
+      JSON.stringify({ error: "Failed to create test user" }),
       { status: 500 }
     );
   }

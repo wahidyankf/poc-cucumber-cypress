@@ -10,6 +10,10 @@ export interface User {
   firstName?: string;
   lastName?: string;
   profilePicture?: string; // Path to the profile picture file
+  phoneNumber?: string;
+  bio?: string;
+  gender?: string;
+  address?: string;
 }
 
 export interface UserInput extends Omit<User, "profilePicture"> {
@@ -44,12 +48,12 @@ export async function readUsers(): Promise<User[]> {
   }
 }
 
+export const getUsers = readUsers; // Alias for readUsers
+
 export async function writeUsers(users: User[]): Promise<void> {
   try {
     await ensureDbExists();
-    console.log("Writing users to file:", users);
     await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
-    console.log("Users written successfully");
   } catch (error) {
     console.error("Error writing users:", error);
     throw error;
@@ -58,9 +62,8 @@ export async function writeUsers(users: User[]): Promise<void> {
 
 export async function clearUsers(): Promise<void> {
   try {
-    console.log("Clearing all users");
-    await writeUsers([]);
-    console.log("Users cleared successfully");
+    await ensureDbExists();
+    await fs.writeFile(USERS_FILE, JSON.stringify([]));
   } catch (error) {
     console.error("Error clearing users:", error);
     throw error;
@@ -73,7 +76,7 @@ export async function findUser(email: string | undefined, password: string | und
     
     const users = await readUsers();
     const user = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      (u) => u.email.toLowerCase().trim() === email.toLowerCase().trim() && u.password.trim() === password.trim()
     );
 
     if (user) {
@@ -82,7 +85,11 @@ export async function findUser(email: string | undefined, password: string | und
         password: user.password,
         firstName: user.firstName,
         lastName: user.lastName,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        phoneNumber: user.phoneNumber,
+        bio: user.bio,
+        gender: user.gender,
+        address: user.address,
       };
     }
     return null;
@@ -97,18 +104,26 @@ export async function createUser(user: UserInput): Promise<void> {
     const users = await readUsers();
     console.log("Existing users:", users);
 
-    // Normalize the user data
+    // Normalize and trim the user data
     const normalizedUser: User = {
-      email: user.email || user.Email,
-      password: user.password || user.Password,
-      firstName: user.firstName || user['First Name'] || user.firstname,
-      lastName: user.lastName || user['Last Name'] || user.lastname,
+      email: (user.email || "").trim(),
+      password: (user.password || "").trim(),
+      firstName: (user.firstName || "").trim(),
+      lastName: (user.lastName || "").trim(),
       profilePicture:
-        typeof user.profilePicture === "string" ? user.profilePicture : undefined,
+        typeof user.profilePicture === "string"
+          ? user.profilePicture.trim()
+          : undefined,
+      phoneNumber: user.phoneNumber?.trim(),
+      bio: user.bio?.trim(),
+      gender: user.gender?.trim(),
+      address: user.address?.trim(),
     };
 
-    // Check if user already exists
-    const existingUser = users.find((u) => (u.email || u.Email) === normalizedUser.email);
+    // Check if user already exists (case-insensitive and trimmed comparison)
+    const existingUser = users.find(
+      (u) => (u.email || "").toLowerCase().trim() === normalizedUser.email.toLowerCase()
+    );
     if (existingUser) {
       console.log("User already exists:", existingUser);
       throw new Error("User already exists");

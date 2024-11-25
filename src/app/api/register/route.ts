@@ -3,33 +3,33 @@ import { createUser, getUsers } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const {
-      email,
-      password,
-      passwordConfirmation,
-      firstName,
-      lastName,
-      phoneNumber,
-      address,
-      gender,
-      terms,
-    } = body;
+    const formData = await request.formData();
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const phoneNumber = formData.get("phoneNumber") as string;
+    const address = formData.get("address") as string;
+    const gender = formData.get("gender") as string;
+    const bio = formData.get("bio") as string;
+    const terms = formData.get("terms") === "true";
+    const newsletter = formData.get("newsletter") === "true";
+    const profilePicture = formData.get("profilePicture") as File;
 
     // Validate required fields
-    if (
-      !email ||
-      !password ||
-      !firstName ||
-      !lastName ||
-      !phoneNumber ||
-      !address ||
-      !gender
-    ) {
+    if (!firstName || !lastName || !email || !password || !phoneNumber || !address || !gender || !terms) {
       return new NextResponse(
-        JSON.stringify({ error: "All fields are required" }),
+        JSON.stringify({ error: "All required fields must be filled" }),
         { status: 400 }
       );
+    }
+
+    // Handle profile picture
+    let profilePictureUrl = "";
+    if (profilePicture) {
+      // In a real app, you would upload this to a storage service
+      // For now, we'll just store the fact that we received it
+      profilePictureUrl = URL.createObjectURL(profilePicture);
     }
 
     // Validate terms acceptance
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
     }
 
     // Validate password match
+    const passwordConfirmation = formData.get("passwordConfirmation") as string;
     if (password !== passwordConfirmation) {
       return new NextResponse(
         JSON.stringify({ error: "Passwords do not match" }),
@@ -67,6 +68,8 @@ export async function POST(request: Request) {
       phoneNumber,
       address,
       gender,
+      bio,
+      profilePictureUrl,
     });
 
     return new NextResponse(JSON.stringify({ success: true }), {

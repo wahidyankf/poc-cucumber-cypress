@@ -90,8 +90,6 @@ Given(
 // Navigation
 When("I visit the dashboard page", () => {
   cy.visit("/dashboard");
-  // Wait for the page to load completely
-  cy.get("h1", { timeout: 10000 }).should("be.visible");
 });
 
 Given("I am on the login page", () => {
@@ -117,30 +115,38 @@ When("I click the login button", () => {
 
 // Assertions
 Then("I should be redirected to the login page", () => {
-  cy.url().should("include", "/login");
+  // Wait for redirect and page load
+  cy.url({ timeout: 10000 }).should("include", "/login");
+  cy.get('[data-test="login-form"]', { timeout: 10000 }).should("be.visible");
 });
 
 Then("I should be redirected to the dashboard page", () => {
   // Wait for navigation and page load
-  cy.url().should("include", "/dashboard");
-  cy.get("h1", { timeout: 10000 }).should("be.visible");
+  cy.url({ timeout: 10000 }).should("include", "/dashboard");
+  cy.get('[data-test="dashboard-welcome"]', { timeout: 10000 }).should("be.visible");
 });
 
 Then("I should see {string} on the page", (text: string) => {
   // Wait for content to be visible with increased timeout
-  cy.contains(text, { timeout: 15000 }).should("be.visible");
+  cy.get('[data-test="dashboard-welcome"]', { timeout: 15000 })
+    .contains(text)
+    .should("be.visible");
 });
 
 Then("I should see my profile information:", (dataTable: DataTable) => {
   const profileInfo = dataTable.rows();
   profileInfo.forEach(([field, value]) => {
-    cy.contains(field, { timeout: 10000 }).should("be.visible");
-    cy.contains(value, { timeout: 10000 }).should("be.visible");
+    cy.get('[data-test="profile-info"]', { timeout: 10000 })
+      .contains(field)
+      .should("be.visible");
+    cy.get('[data-test="profile-info"]', { timeout: 10000 })
+      .contains(value)
+      .should("be.visible");
   });
 });
 
 Then("I should see a {string} badge", (text: string) => {
-  cy.get(".mantine-Badge-root", { timeout: 10000 })
+  cy.get('[data-test="gender-badge"]', { timeout: 10000 })
     .contains(text)
     .should("be.visible");
 });

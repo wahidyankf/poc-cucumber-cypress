@@ -7,6 +7,7 @@ import {
   Title,
   Stack,
   Text,
+  Alert,
 } from "@mantine/core";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -21,65 +22,84 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    // Let HTML5 validation handle empty fields
+    if (!email || !password) {
+      return;
+    }
 
-    const data = await response.json();
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (response.ok) {
-      // Store user info in localStorage
-      localStorage.setItem(
-        "userInfo",
-        JSON.stringify({
-          firstName: data.firstName || "John", // Fallback for test data
-          lastName: data.lastName || "Doe",
-          email: email,
-          phoneNumber: data.phoneNumber || "",
-          bio: data.bio || "",
-          gender: data.gender || "",
-        })
-      );
+      const data = await response.json();
 
-      router.push("/dashboard");
-    } else {
-      setError(data.error || "Invalid credentials");
+      if (response.ok) {
+        // Store user info in localStorage
+        localStorage.setItem(
+          "userInfo",
+          JSON.stringify({
+            firstName: data.firstName || "John", // Fallback for test data
+            lastName: data.lastName || "Doe",
+            email: email,
+            phoneNumber: data.phoneNumber || "",
+            bio: data.bio || "",
+            gender: data.gender || "",
+          })
+        );
+
+        // Wait a bit for localStorage to be set
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Redirect to dashboard
+        router.push("/dashboard");
+      } else {
+        setError(data.error || "Invalid credentials");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("An error occurred during login");
     }
   };
 
   return (
-    <Container size="xs" mt="xl">
-      <Title order={1} ta="center" mb="xl">
+    <Container size="xs" py="xl">
+      <Title order={2} ta="center" mt="md" mb="md">
         Login
       </Title>
 
-      <form onSubmit={handleSubmit}>
+      {error && (
+        <Alert color="red" mb="md" data-test="error-message">
+          {error}
+        </Alert>
+      )}
+
+      <form onSubmit={handleSubmit} noValidate data-test="login-form">
         <Stack>
-          {error && (
-            <Text c="red" ta="center" data-test="validation-error">
-              {error}
-            </Text>
-          )}
           <TextInput
-            data-test="email"
             label="Email"
+            placeholder="Enter your email"
+            required
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
+            data-test="email"
           />
+
           <TextInput
-            data-test="password"
             label="Password"
+            placeholder="Enter your password"
+            required
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
+            data-test="password"
           />
+
           <Button type="submit" data-test="login-button">
             Login
           </Button>
