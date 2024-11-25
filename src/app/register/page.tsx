@@ -98,9 +98,8 @@ export default function Register() {
     }
 
     // Check password match
-    const password = form.querySelector<HTMLInputElement>(
-      '[name="password"]'
-    )?.value;
+    const password =
+      form.querySelector<HTMLInputElement>('[name="password"]')?.value;
     const confirmation = form.querySelector<HTMLInputElement>(
       '[name="passwordConfirmation"]'
     )?.value;
@@ -109,9 +108,8 @@ export default function Register() {
     }
 
     // Check terms
-    const terms = form.querySelector<HTMLInputElement>(
-      '[name="terms"]'
-    )?.checked;
+    const terms =
+      form.querySelector<HTMLInputElement>('[name="terms"]')?.checked;
     if (!terms) {
       newValidationErrors.terms = true;
     }
@@ -140,8 +138,7 @@ export default function Register() {
         );
         formData.append(
           "lastName",
-          form.querySelector<HTMLInputElement>('[name="lastName"]')?.value ||
-            ""
+          form.querySelector<HTMLInputElement>('[name="lastName"]')?.value || ""
         );
         formData.append(
           "email",
@@ -149,14 +146,12 @@ export default function Register() {
         );
         formData.append(
           "password",
-          form.querySelector<HTMLInputElement>('[name="password"]')?.value ||
-            ""
+          form.querySelector<HTMLInputElement>('[name="password"]')?.value || ""
         );
         formData.append(
           "passwordConfirmation",
-          form.querySelector<HTMLInputElement>(
-            '[name="passwordConfirmation"]'
-          )?.value || ""
+          form.querySelector<HTMLInputElement>('[name="passwordConfirmation"]')
+            ?.value || ""
         );
         formData.append(
           "phoneNumber",
@@ -165,8 +160,7 @@ export default function Register() {
         );
         formData.append(
           "address",
-          form.querySelector<HTMLInputElement>('[name="address"]')?.value ||
-            ""
+          form.querySelector<HTMLInputElement>('[name="address"]')?.value || ""
         );
         formData.append(
           "gender",
@@ -210,10 +204,10 @@ export default function Register() {
         // Store user info in localStorage
         const userInfo = {
           email: form.querySelector<HTMLInputElement>('[name="email"]')?.value,
-          firstName: form.querySelector<HTMLInputElement>('[name="firstName"]')
-            ?.value,
-          lastName: form.querySelector<HTMLInputElement>('[name="lastName"]')
-            ?.value,
+          firstName:
+            form.querySelector<HTMLInputElement>('[name="firstName"]')?.value,
+          lastName:
+            form.querySelector<HTMLInputElement>('[name="lastName"]')?.value,
           phoneNumber: form.querySelector<HTMLInputElement>(
             '[name="phoneNumber"]'
           )?.value,
@@ -265,7 +259,7 @@ export default function Register() {
               label="Profile Picture"
               placeholder="Upload your profile picture"
               accept="image/jpeg,image/png"
-              icon={<IconUpload size={14} />}
+              leftSection={<IconUpload size={14} />}
               value={profilePicture}
               onChange={setProfilePicture}
               data-test="profile-picture"
